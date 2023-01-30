@@ -49,7 +49,7 @@ let createBtns = function (btnLocation) {
     let historyBtns = document.createElement("button");
     historyBtns.textContent = btnLocation;
     historyBtns.setAttribute("type", "button");
-    historyBtns.setAttribute("class", "btn btn-primary border-bottom");
+    historyBtns.setAttribute("class", "btn btn-primary border mb-2 custom-bg");
     $("#history").append(historyBtns);
 }
 
@@ -61,6 +61,7 @@ let display = function (data) {
     let iconId = data["weather"][0]["icon"];
     let iconUrl = "http://openweathermap.org/img/wn/" + iconId + "@2x.png"
     let iconImg = document.createElement("img");
+    iconImg.setAttribute("style", "width:10%");
     iconImg.setAttribute("src", iconUrl);
     iconImg.setAttribute("alt", "weather icon");
 

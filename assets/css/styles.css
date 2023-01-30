@@ -1,0 +1,30 @@
+header {
+    background: linear-gradient(to right, #3366ff, #26004d);
+    color: white;
+}
+
+h1 {
+    padding: 0.5rem;
+    text-align: right;
+    padding-right: 20%;
+}
+
+.custom-bg {
+    background-color: lightgrey;
+    color: black;
+}
+
+.custom-bg:hover {
+    background-color: grey;
+}
+
+.card {
+    background-color: #242e42;
+    color: white;
+}
+
+#forecastCards {
+    display: flex;
+    flex-direction: grid;
+    justify-content: space-between;
+}
