@@ -1,38 +1,47 @@
 let APIKey = "d052d09f2d383be8f3bac08e6cde5910";
 let search = document.querySelector("#search");
-let forecastUrl;
 let historyArr = [];
-let city;
+let forecastUrl;
 
-////////////////////// function runs on page load ///////////////////
+/////////////// Function runs when page is loaded ///////////////
+// gets data from local storage and prints it under the search area if there is
 $(function () {
     historyArr = JSON.parse(localStorage.getItem("location")) || [];
-    console.log("previous history: " + historyArr);
     for (i = 0; i < historyArr.length; i++) {
         createBtns(historyArr[i]);
     }
 })
 
-////////////////////// search button pressed ///////////////////////
-//when search button is pressed (search is saved, put in a url, fetch is run)
-$("#searchBtn").click(function (event) {
-    event.preventDefault();
+//////////////// Create buttons (search history) ////////////////
+let createBtns = function (locationBtn) {
+    let historyBtn = document.createElement("button");
+    historyBtn.textContent = locationBtn;
+    historyBtn.setAttribute("type", "button");
+    historyBtn.setAttribute("class", "btn btn-primary border mb-2 custom-bg");
+    $("#history").append(historyBtn);
+}
 
-    city = search.value;
+//////////////////////// Search button  /////////////////////////
+//when search is pressed (search is saved, put in a url, fetch is run)
+$("#searchBtn").click(function () {
+    let city = search.value;
     let queryUrl = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + APIKey + "&units=metric";
 
-    //fetches url. if url returns valid, save history(in array and button), then run display content function)
+    //fetches url. if url is okay, save history, then run display content function. else, prompt user to try again
     fetch(queryUrl)
         .then(function (response) {
             if (response.ok) {
+                //clears line if #valid previously had text
                 $("#valid").text("");
+
+                //checks if the city has already been searched, if not, add it to the array, create a button, and save it to local storage.
                 if (historyArr.includes(city)) {
-                    console.log(city + " is already in search history")
+                    console.log(city + " is already in search history");
                 } else {
-                    console.log("adding " + city + " to search history");
                     historyArr.push(city);
-                    localStorage.setItem("location", JSON.stringify(historyArr));
                     createBtns(city);
+                    localStorage.setItem("location", JSON.stringify(historyArr));
+                    console.log("adding " + city + " to search history");
                 }
                 return response.json();
             } else {
@@ -40,34 +49,24 @@ $("#searchBtn").click(function (event) {
             }
         })
         .then(function (responseData) {
-            display(responseData);
+            displayCurrent(responseData);
         });
 })
 
-///////////////////// function that creates history buttons ///////////////
-let createBtns = function (btnLocation) {
-    let historyBtns = document.createElement("button");
-    historyBtns.textContent = btnLocation;
-    historyBtns.setAttribute("type", "button");
-    historyBtns.setAttribute("class", "btn btn-primary border mb-2 custom-bg");
-    $("#history").append(historyBtns);
-}
-
-////////////////////// displays current stats //////////////////////////////
-let display = function (data) {
+///////////////////// Display current stats /////////////////////
+let displayCurrent = function (data) {
     //card title (location, date, and icon)
     let location = data["name"];
     let date = dayjs().format("M/DD/YYYY");
     let iconId = data["weather"][0]["icon"];
     let iconUrl = "http://openweathermap.org/img/wn/" + iconId + "@2x.png"
     let iconImg = document.createElement("img");
-    iconImg.setAttribute("style", "width:10%");
+    iconImg.setAttribute("style", "width:13%");
     iconImg.setAttribute("src", iconUrl);
     iconImg.setAttribute("alt", "weather icon");
 
     $("#location").text(location + " (" + date + ")");
     $("#location").append(iconImg);
-
 
     //body information (current weather conditions)
     let temp = data["main"]["temp"];
@@ -77,14 +76,14 @@ let display = function (data) {
     $("#currentTemp #wind").text(wind);
     $("#currentTemp #humidity").text(humidity);
 
-    //returning 5 day forecast information
+    //returning information needed for the 5 day forecast
     let lat = data["coord"]["lat"];
     let lon = data["coord"]["lon"];
     forecastUrl = "https://api.openweathermap.org/data/2.5/forecast?lat=" + lat + "&lon=" + lon + "&appid=" + APIKey + "&units=metric";
     forecast();
 };
 
-////////////////////// displays 5 day forcasted weather (at noon) //////////////////////
+/////////// Display 5-day forecast conditions(at noon) //////////
 let forecast = function () {
     let forecastArr = [];
     fetch(forecastUrl)
@@ -92,6 +91,7 @@ let forecast = function () {
             return response.json();
         })
         .then(function (data) {
+            //runs through the dataset. If day is larger than today, and time = noon, collect data and add it to an array.
             for (i = 0; i < data.list.length; i++) {
                 let today = dayjs().format("YYYY-MM-DD");
                 let dayAndTime = data["list"][i]["dt_txt"].split(" ");
@@ -115,6 +115,7 @@ let forecast = function () {
                     forecastArr.push(forecastDay);
                 }
             }
+            //taking data collected above, and displaying it on the screen
             for (i = 0; i < forecastArr.length; i++) {
                 let day = "";
                 day = "#day" + (i + 1); //to select div id from html
@@ -139,13 +140,9 @@ let forecast = function () {
                 document.querySelector(day).querySelector(".humidity").textContent = humidity;
             }
         })
-
-
-
-
 }
 
-////////////////////// when a button is clicked in the history ///////////////////
+//////////////////////// History button /////////////////////////
 $("#history").click(function (event) {
     let locationClick = event.target.textContent;
     let queryUrl = "https://api.openweathermap.org/data/2.5/weather?q=" + locationClick + "&appid=" + APIKey + "&units=metric";
@@ -155,9 +152,6 @@ $("#history").click(function (event) {
             return response.json();
         })
         .then(function (responseData) {
-            display(responseData);
+            displayCurrent(responseData);
         })
 });
-
-
-//useful: https://openweathermap.org/current#data

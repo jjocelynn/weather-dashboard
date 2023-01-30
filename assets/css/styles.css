@@ -1,3 +1,4 @@
+/* header */
 header {
     background: linear-gradient(to right, #3366ff, #26004d);
     color: white;
@@ -9,6 +10,8 @@ h1 {
     padding-right: 20%;
 }
 
+
+/* forecast cards */
 .custom-bg {
     background-color: lightgrey;
     color: black;
